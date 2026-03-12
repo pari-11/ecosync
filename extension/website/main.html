@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EcoSync</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f0f4f8;
+      --surface:   #ffffff;
+      --border:    #dde3ec;
+      --text:      #1a2035;
+      --muted:     #6b7a99;
+      --accent:    #3b6ef6;
+      --red:       #e53935;
+      --yellow:    #f59e0b;
+      --green:     #16a34a;
+      --red-bg:    #fef2f2;
+      --yellow-bg: #fffbeb;
+      --green-bg:  #f0fdf4;
+      --nav-w:     260px;
+      --radius:    14px;
+      --shadow:    0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    #sidebar {
+      width: var(--nav-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo img { width: 42px; height: 42px; border-radius: 8px; }
+
+    .sidebar-logo-text { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .sidebar-logo-text span { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
+
+    nav { padding: 16px 12px; flex: 1; }
+
+    .nav-label {
+      font-size: 10px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 0 8px; margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--muted);
+      transition: all 0.18s ease; margin-bottom: 2px;
+      border: 1px solid transparent;
+    }
+
+    .nav-item:hover { background: var(--bg); color: var(--text); border-color: var(--border); }
+    .nav-item.active { background: #eff4ff; color: var(--accent); border-color: #c7d8fd; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .nav-badge {
+      margin-left: auto; font-size: 10px;
+      background: #fffbeb; color: var(--yellow);
+      padding: 2px 7px; border-radius: 20px; border: 1px solid #fde68a;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--muted);
+    }
+
+    #main { margin-left: var(--nav-w); flex: 1; padding: 32px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 24px; font-weight: 700; }
+    .page-header p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.10); }
+    .card-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .card-value { font-size: 32px; font-weight: 700; line-height: 1; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    .home-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto; gap: 16px;
+    }
+
+    .section-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
+      cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .section-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.11); }
+
+    .section-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .section-card-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .section-card-title { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .section-card-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .section-card-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .sc-stat {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 14px;
+      text-align: center; flex: 1; min-width: 60px;
+    }
+    .sc-stat .v { font-size: 20px; font-weight: 700; }
+    .sc-stat .l { font-size: 10px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+    .tl-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; transition: all 0.4s ease; flex-shrink: 0;
+    }
+    .tl-red    { background: var(--red-bg);    border: 3px solid var(--red); }
+    .tl-yellow { background: var(--yellow-bg); border: 3px solid var(--yellow); }
+    .tl-green  { background: var(--green-bg);  border: 3px solid var(--green); }
+    .tl-unknown{ background: var(--bg);        border: 3px solid var(--border); }
+
+    .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .pill-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid #fca5a5; }
+    .pill-yellow { background: var(--yellow-bg); color: #b45309;       border: 1px solid #fde68a; }
+    .pill-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid #bbf7d0; }
+    .pill-blue   { background: #eff4ff;           color: var(--accent); border: 1px solid #c7d8fd; }
+
+    .stat-mini { text-align: center; }
+    .stat-mini .val { font-size: 28px; font-weight: 700; }
+    .stat-mini .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+    .val.red    { color: var(--red); }
+    .val.yellow { color: var(--yellow); }
+    .val.green  { color: var(--green); }
+    .val.blue   { color: var(--accent); }
+
+    .table-wrap { overflow-y: auto; max-height: 440px; border-radius: 10px; border: 1px solid var(--border); }
+    .tab-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tab-table th {
+      text-align: left; font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 14px;
+      border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0;
+    }
+    .tab-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .tab-table tr:last-child td { border-bottom: none; }
+    .tab-table tr { transition: background 0.15s ease; }
+    .tab-table tr:hover td { background: var(--bg); }
+    .tab-row-heavy   td:first-child { border-left: 3px solid var(--red); }
+    .tab-row-dynamic td:first-child { border-left: 3px solid var(--yellow); }
+    .tab-row-static  td:first-child { border-left: 3px solid var(--green); }
+
+    .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; letter-spacing: 0.04em; }
+    .badge-heavy   { background: var(--red-bg);    color: var(--red);    border: 1px solid #fca5a5; }
+    .badge-dynamic { background: var(--yellow-bg); color: #b45309;       border: 1px solid #fde68a; }
+    .badge-static  { background: var(--green-bg);  color: var(--green);  border: 1px solid #bbf7d0; }
+
+    .refresh-bar { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+    .refresh-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 14px;
+      font-size: 12px; font-weight: 500; color: var(--text);
+      cursor: pointer; transition: all 0.18s ease;
+    }
+    .refresh-btn:hover { background: var(--bg); border-color: var(--accent); color: var(--accent); }
+
+    .coming-soon {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 80px 40px; text-align: center;
+      border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface);
+    }
+    .coming-soon .cs-icon { font-size: 48px; margin-bottom: 16px; }
+    .coming-soon h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .coming-soon p { font-size: 14px; color: var(--muted); max-width: 380px; line-height: 1.6; }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #1a2035 0%, #2d3a6b 100%);
+      color: white; border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 20px rgba(26,32,53,0.15);
+    }
+    .hero-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .hero-banner p  { font-size: 13px; color: rgba(255,255,255,0.6); }
+    .hero-right { text-align: right; }
+    .hero-intensity { font-size: 40px; font-weight: 700; line-height: 1; }
+    .hero-unit { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinning { animation: spin 1s linear infinite; display: inline-block; }
+
+    body.dark {
+  --bg:        #0f1117;
+  --surface:   #1a1f2e;
+  --border:    #2a3147;
+  --text:      #e8ecf4;
+  --muted:     #6b7a99;
+  --red-bg:    #2a1515;
+  --yellow-bg: #1f1a0e;
+  --green-bg:  #0e1f14;
+}
+body.dark .hero-banner {
+  background: linear-gradient(135deg, #0a0d16 0%, #1a2040 100%);
+}
+body.dark .tab-table th { background: var(--bg); }
+body.dark .nav-item.active { background: #1a2550; }
+body.dark .sc-stat { background: var(--bg); }
+
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <img src="../icons/logo.png" alt="icon" />
+    <div class="sidebar-logo-text">
+      EcoSync
+      <span>Carbon-Aware Platform</span>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-label">Menu</div>
+    <div class="nav-item active" data-page="home"><span class="icon">🏠</span> Home</div>
+    <div class="nav-item" data-page="dashboard"><span class="icon">📡</span> Dashboard</div>
+    <div class="nav-item" data-page="tab-auditor"><span class="icon">🗂️</span> Tab Auditor</div>
+    <div class="nav-item" data-page="downloads"><span class="icon">⬇️</span> Downloads Monitor<span class="nav-badge">Soon</span></div>
+    <div class="nav-item" data-page="eco-scheduler"><span class="icon">🗓️</span> Eco-Scheduler<span class="nav-badge">Soon</span></div>
+  </nav>
+<div class="sidebar-footer">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <span>EcoSync v1.0 · IN-WE</span>
+    <button id="dark-toggle" onclick="toggleDark()" style="
+      background:var(--bg);border:1px solid var(--border);
+      border-radius:20px;padding:4px 10px;cursor:pointer;
+      font-size:12px;color:var(--muted);transition:all 0.2s ease;">
+      🌙 Dark
+    </button>
+  </div>
+</div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main id="main">
+
+  <!-- ── HOME ── -->
+  <section class="page active" id="page-home">
+    <div class="page-header">
+      <h1>EcoSync</h1>
+      <p>Your carbon-aware productivity platform. Monitor, schedule, and reduce your digital carbon footprint.</p>
+    </div>
+
+    <div class="hero-banner">
+      <div>
+        <h2>Live Grid · India (IN-WE)</h2>
+        <p>Real-time carbon intensity from Electricity Maps</p>
+        <div style="margin-top:14px;" id="home-tl-pill"></div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-intensity" id="home-intensity">--</div>
+        <div class="hero-unit">gCO₂/kWh · <span id="home-timestamp">fetching...</span></div>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <div class="section-card" onclick="navigate('dashboard')">
+        <div class="section-card-header">
+          <div>
+            <div class="section-card-title">📡 Dashboard</div>
+            <div class="section-card-desc">Live grid carbon intensity, traffic light status, and CO₂ emission rate.</div>
+          </div>
+          <div class="section-card-icon" style="background:#eff4ff;color:var(--accent);">📡</div>
+        </div>
+        <div class="section-card-stats">
+          <div class="sc-stat">
+            <div class="v" id="home-co2" style="color:var(--text);">--</div>
+            <div class="l">CO₂/hr (g)</div>
+          </div>
+          <div class="sc-stat">
+            <div class="v green" id="home-session-co2">--</div>
+            <div class="l">Session CO₂</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card" onclick="navigate('tab-auditor')">
+        <div class="section-card-header">
+          <div>
+            <div class="section-card-title">🗂️ Tab Auditor</div>
+            <div class="section-card-desc">All open tabs classified by energy type with per-tab power estimates.</div>
+          </div>
+          <div class="section-card-icon" style="background:#fffbeb;color:var(--yellow);">🗂️</div>
+        </div>
+        <div class="section-card-stats">
+          <div class="sc-stat"><div class="v red" id="home-heavy">--</div><div class="l">Heavy</div></div>
+          <div class="sc-stat"><div class="v yellow" id="home-dynamic">--</div><div class="l">Dynamic</div></div>
+          <div class="sc-stat"><div class="v green" id="home-static">--</div><div class="l">Static</div></div>
+          <div class="sc-stat"><div class="v blue" id="home-power">--</div><div class="l">Power (W)</div></div>
+        </div>
+      </div>
+
+      <div class="section-card" onclick="navigate('downloads')" style="opacity:0.75;">
+        <div class="section-card-header">
+          <div>
+            <div class="section-card-title">⬇️ Downloads Monitor <span class="pill pill-yellow" style="font-size:10px;vertical-align:middle;margin-left:6px;">Soon</span></div>
+            <div class="section-card-desc">Intercept downloads during dirty grid periods and defer them to greener windows.</div>
+          </div>
+          <div class="section-card-icon" style="background:#f0fdf4;color:var(--green);">⬇️</div>
+        </div>
+        <div class="section-card-stats">
+          <div class="sc-stat"><div class="v" style="color:var(--muted);">--</div><div class="l">Intercepted</div></div>
+          <div class="sc-stat"><div class="v" style="color:var(--muted);">--</div><div class="l">Deferred</div></div>
+          <div class="sc-stat"><div class="v" style="color:var(--muted);">--</div><div class="l">CO₂ Saved</div></div>
+        </div>
+      </div>
+
+      <div class="section-card" onclick="navigate('eco-scheduler')" style="opacity:0.75;">
+        <div class="section-card-header">
+          <div>
+            <div class="section-card-title">🗓️ Eco-Scheduler <span class="pill pill-yellow" style="font-size:10px;vertical-align:middle;margin-left:6px;">Soon</span></div>
+            <div class="section-card-desc">Schedule energy-intensive tasks to low-carbon grid windows using Calendar integration.</div>
+          </div>
+          <div class="section-card-icon" style="background:#fef2f2;color:var(--red);">🗓️</div>
+        </div>
+        <div class="section-card-stats">
+          <div class="sc-stat"><div class="v" style="color:var(--muted);">--</div><div class="l">Scheduled</div></div>
+          <div class="sc-stat"><div class="v" style="color:var(--muted);">--</div><div class="l">Rescheduled</div></div>
+          <div class="sc-stat"><div class="v" style="color:var(--muted);">--</div><div class="l">CO₂ Saved</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ↑ HOME SECTION CLOSES HERE ↑ -->
+
+  <!-- ── DASHBOARD ── -->
+  <section class="page" id="page-dashboard">
+    <div class="page-header">
+      <h1>📡 Dashboard</h1>
+      <p>Live grid carbon intensity and real-time stats.</p>
+    </div>
+
+    <div class="refresh-bar">
+  <span id="last-updated">Last updated: --</span>
+  <div style="display:flex;gap:8px;">
+    <button class="refresh-btn" id="sim-btn" onclick="toggleSimulate()">
+      🟢 Simulate Green Window
+    </button>
+    <button class="refresh-btn" onclick="loadDashboard()">
+      <span id="dash-spin">↻</span> Refresh
+    </button>
+  </div>
+</div>
+
+
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card" style="display:flex;align-items:center;gap:24px;">
+        <div id="dash-tl-circle" class="tl-circle tl-unknown">🌍</div>
+        <div>
+          <div class="card-title">Grid Status · India (IN-WE)</div>
+          <div class="card-value" id="dash-intensity">--</div>
+          <div class="card-sub">gCO₂/kWh</div>
+          <div style="margin-top:10px;" id="dash-pill"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Thresholds</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+            <span>🟢 Clean grid</span><span class="pill pill-green">&lt; 200 gCO₂/kWh</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+            <span>🟡 Moderate grid</span><span class="pill pill-yellow">200 – 400 gCO₂/kWh</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+            <span>🔴 Dirty grid</span><span class="pill pill-red">&gt; 400 gCO₂/kWh</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card stat-mini">
+        <div class="val" id="dash-co2" style="color:var(--text);">--</div>
+        <div class="lbl">CO₂ Rate (g/hr)</div>
+      </div>
+      <div class="card stat-mini">
+        <div class="val green" id="dash-session">--</div>
+        <div class="lbl">Session CO₂ (g)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TAB AUDITOR ── -->
+  <section class="page" id="page-tab-auditor">
+    <div class="page-header">
+      <h1>🗂️ Tab Auditor</h1>
+      <p>All tabs currently open, color-coded by energy type. Auto-refreshes every 15s.</p>
+    </div>
+
+    <div class="refresh-bar">
+      <span id="tab-last-updated">Auto-refreshes every 15s · Last updated: --</span>
+      <button class="refresh-btn" onclick="loadTabs()">
+        <span id="tab-spin">↻</span> Refresh Now
+      </button>
+    </div>
+
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="card stat-mini"><div class="val red" id="dash-heavy">--</div><div class="lbl">Heavy Tabs</div></div>
+      <div class="card stat-mini"><div class="val yellow" id="dash-dynamic">--</div><div class="lbl">Dynamic Tabs</div></div>
+      <div class="card stat-mini"><div class="val green" id="dash-static">--</div><div class="lbl">Static Tabs</div></div>
+      <div class="card stat-mini"><div class="val blue" id="dash-power">--</div><div class="lbl">Est. Power (W)</div></div>
+    </div>
+
+    <div style="background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);">
+      <div class="table-wrap">
+        <table class="tab-table">
+          <thead>
+  <tr>
+    <th style="padding-left:20px;">Tab Title</th>
+    <th>Type</th>
+    <th>Power</th>
+  </tr>
+</thead>
+<tbody id="tab-tbody">
+  <tr><td colspan="3" style="text-align:center;padding:40px;color:var(--muted);">Loading tabs...</td></tr>
+</tbody>
+
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── DOWNLOADS MONITOR ── -->
+  <section class="page" id="page-downloads">
+    <div class="page-header">
+      <h1>⬇️ Downloads Monitor</h1>
+      <p>Carbon-aware download scheduling.</p>
+    </div>
+    <div class="coming-soon">
+      <div class="cs-icon">⬇️</div>
+      <h3>Downloads Monitor — Coming Soon</h3>
+      <p>This section will intercept browser downloads when the grid is dirty and offer to schedule them for a greener window. You'll also see the CO₂ cost of downloading now vs. waiting.</p>
+    </div>
+  </section>
+
+  <!-- ── ECO-SCHEDULER ── -->
+  <section class="page" id="page-eco-scheduler">
+    <div class="page-header">
+      <h1>🗓️ Eco-Scheduler</h1>
+      <p>Schedule heavy tasks to green grid windows.</p>
+    </div>
+    <div class="coming-soon">
+      <div class="cs-icon">🗓️</div>
+      <h3>Eco-Scheduler — Coming Soon</h3>
+      <p>This section will integrate with Google Calendar to automatically reschedule energy-intensive tasks — backups, renders, uploads — to low-carbon grid windows overnight.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
